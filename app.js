@@ -8,7 +8,7 @@ import DBCM from './src/models/modelCards';
 const app = express();
 app.use(bodyParser.json());
 
-const db_string = "";
+const db_string = "mongodb+srv://marcosgabriel:mgmm4103@cluster0.7mnfxzs.mongodb.net/?retryWrites=true&w=majority";
 
 mongoose.connect(db_string,{
     useNewUrlParser: true,
@@ -28,35 +28,35 @@ app.post('/', async (req, res) => {
 
     let uid, data, permissao, sentido;
     for(let i=0; i<req.body.length;i++){
+        
         uid = req.body[i].uid;
-        for(let j=0; j<req.body[i].data.length;j++){
-            data = req.body[i].data[j];
-            sentido = req.body[i].sentido[j];
-            permissao = req.body[i].permissao[j];
+        data = req.body[i].data;
+        sentido = req.body[i].sentido;
+        permissao = req.body[i].permissao;
 
-            //console.log(`UID ${uid} ; DATA ${data} ; SENTIDO ${sentido} ; PERMISSAO ${permissao}`);
-            try{
-                DBM.findOneAndUpdate(
-                    {UID:uid},
-                    {$push: {
-                        HistoricoData: FormatedData(data),
-                        HistoricoSentido: sentido,
-                        HistoricoPermissao: permissao
-                    }}, async (err, documento) => {
-                        if(err){
-                            console.log(err);
-                        }else{
-                            if(i==req.body.length-1){
-                                console.log("Todos os documentos atualizados");
-                            }; //caso queria ver o documento, so atualizar por "documento"
-                        }
-                    }
-                );
-            }catch(err){
-                console.log(err);
-                return res.status(-1).send("Erro interno do servidor");
-            };
-        }
+        console.log(`UID ${uid} ; DATA ${data} ; SENTIDO ${sentido} ; PERMISSAO ${permissao}`);
+				try{
+						DBM.findOneAndUpdate(
+								{UID:uid},
+								{$push: {
+										HistoricoData: FormatedData(data),
+										HistoricoSentido: sentido,
+										HistoricoPermissao: permissao
+								}}, async (err, documento) => {
+										if(err){
+												console.log(err);
+										}else{
+												if(i==req.body.length-1){
+														console.log("Todos os documentos atualizados");
+														return res.status(200).send("Operação feita com sucesso (CODE :200)");
+												}; //caso queria ver o documento, so atualizar por "documento"
+										}
+								}
+						);
+				}catch(err){
+						console.log(err);
+						return res.status(-1).send("Erro interno do servidor");
+				};
     }
 });
 
@@ -68,13 +68,8 @@ app.get('/get', async (req, res) => {
 
     let historico = [];
     for(let i=0; i<luid.length; i++){
-        
         const uid_ = luid[i];
-        const data_ = [];
-        const sentido_ = [];
-        const permissao_ = [];
-
-        historico.push({uid_,data_,sentido_,permissao_});
+        historico.push(uid_);
     }
 
     const historicoJson = JSON.stringify(historico);

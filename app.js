@@ -58,18 +58,26 @@ app.post('/', async (req, res) => {
 						return res.status(-1).send("Erro interno do servidor");
 				};
     }
-});
+}); 
 
 
 app.get('/get', async (req, res) => {
 
-    const data = await DBCM.findOne({ residencia:"residencia2216" }); 
-    const luid = data.uids;
+    const id = req.query.residencia
+    console.log(id)
+
+    const data = await DBCM.findOne({ residencia:id }); 
+    const objects = data.objects
 
     let historico = [];
-    for(let i=0; i<luid.length; i++){
-        const uid_ = luid[i];
-        historico.push(uid_);
+    for(let i=0; i<objects.length; i++){
+        
+        let new_data = {}
+        
+        new_data["uid"] = objects[i].uid
+        new_data["name"] = objects[i].name
+
+        historico.push(new_data);
     }
 
     const historicoJson = JSON.stringify(historico);

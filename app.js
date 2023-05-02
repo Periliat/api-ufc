@@ -59,7 +59,7 @@ function FormatedData(unix){
 };
 
 
-app.post('/', async (req, res) => {
+app.post('/post', async (req, res) => {
 
     let uid, data, permissao, sentido;
     for(let i=0; i<req.body.length;i++){

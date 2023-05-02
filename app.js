@@ -2,8 +2,46 @@ const mongoose = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
 
-import DBM from './src/models/model';
-import DBCM from './src/models/modelCards';
+const DBC_Schema = new mongoose.Schema ({
+        residencia:String,
+        objects:[{
+                uid:String,
+                nome:String
+        }]
+});
+    
+const DB_Schema = new mongoose.Schema ({
+        uid: String,
+        nome: String,
+        cpf: String,
+        data_nascimento: String,
+        sexo: String,
+        email: String,
+        telefone: String,
+        contato_emergencia_nome: String,
+        conteto_emergencia_parentesco: String,
+        contato_emergencia_telefone: String,
+        rua: String,
+        numero: String,
+        bairro: String,
+        cep: String,
+        cidade: String,
+        estado: String,
+        residencia: [String],
+        apartamento: [String],
+        numero_quarto: [String],
+        data_entrada: [String],
+        data_saida: [String],
+        acesso: String,
+        historico_data: [String],
+        historico_sentido: [String],
+        historico_permissao: [String],
+});
+
+
+const DBCM = mongoose.model('cartoes', DBC_Schema);
+const DBM = mongoose.model('residentes', DB_Schema);
+
 
 const app = express();
 app.use(bodyParser.json());

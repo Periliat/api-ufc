@@ -15,9 +15,9 @@ const DB_Schema = new Schema ({
    Numero:String,
    Bairro:String,
    CEP:String,
-   HistoricoData:[String],
-   HistoricoPermissao:[String],
-   HistoricoSentido:[String]
+   HistóricoData:[String],
+   HistóricoPermissão:[String],
+   HistóricoSentido:[String]
 });
 
 

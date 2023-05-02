@@ -8,7 +8,7 @@ import DBCM from './src/models/modelCards';
 const app = express();
 app.use(bodyParser.json());
 
-const db_string = "mongodb+srv://marcosgabriel:mgmm4103@cluster0.7mnfxzs.mongodb.net/?retryWrites=true&w=majority";
+const db_string = "mongodb+srv://Kauan_Prog:Kauandbs159753.@garu.fwrnoix.mongodb.net/test?retryWrites=true&w=majority";
 
 mongoose.connect(db_string,{
     useNewUrlParser: true,
@@ -23,9 +23,6 @@ function FormatedData(unix){
 
 app.post('/', async (req, res) => {
 
-    //! ATENÇÃO VARIAS REQUISIÇÕES AO BANCO DE DADOS, ISSO PODE DEIXAR A API LENTA. (VAI QUEBRAR).
-    //* A TESTAR.
-
     let uid, data, permissao, sentido;
     for(let i=0; i<req.body.length;i++){
         
@@ -35,49 +32,56 @@ app.post('/', async (req, res) => {
         permissao = req.body[i].permissao;
 
         console.log(`UID ${uid} ; DATA ${data} ; SENTIDO ${sentido} ; PERMISSAO ${permissao}`);
-				try{
-						DBM.findOneAndUpdate(
-								{UID:uid},
-								{$push: {
-										HistoricoData: FormatedData(data),
-										HistoricoSentido: sentido,
-										HistoricoPermissao: permissao
-								}}, async (err, documento) => {
-										if(err){
-												console.log(err);
-										}else{
-												if(i==req.body.length-1){
-														console.log("Todos os documentos atualizados");
-														return res.status(200).send("Operação feita com sucesso (CODE :200)");
-												}; //caso queria ver o documento, so atualizar por "documento"
-										}
-								}
-						);
-				}catch(err){
-						console.log(err);
-						return res.status(-1).send("Erro interno do servidor");
-				};
+        try{
+                DBM.findOneAndUpdate(
+                        {UID:uid},
+                        {$push: {
+                                HistóricoData: FormatedData(data),
+                                HistóricoSentido: sentido,
+                                HistóricoPermissão: permissao
+                        }}, async (err, documento) => {
+                                if(err){
+                                        console.log(err);
+                                }else{
+                                        if(i==req.body.length-1){
+                                                console.log("Todos os documentos atualizados");
+                                                return res.status(200).send("Operação feita com sucesso (CODE :200)");
+                                        }; //caso queria ver o documento, so atualizar por "documento"
+                                }
+                        }
+                );
+        }catch(err){
+                console.log(err);
+                return res.status(-1).send("Erro interno do servidor");
+        };
     }
-}); 
+});
 
 
 app.get('/get', async (req, res) => {
 
-    const id = req.query.residencia
-    console.log(id)
+    const dispositivo = req.query.residencia
+    
+    //console.log(dispositivo)
 
-    const data = await DBCM.findOne({ residencia:id }); 
-    const objects = data.objects
+    const data = await DBCM.findOne({ residencia:dispositivo}); 
+    const obj = data.objects
+
+    //console.log(obj);
 
     let historico = [];
-    for(let i=0; i<objects.length; i++){
+    for(let i=0; i<obj.length; i++){
         
-        let new_data = {}
+        let new_data = {};
         
-        new_data["uid"] = objects[i].uid
-        new_data["name"] = objects[i].name
+        const uid_ = obj[i].uid;
+        const _name = obj[i].nome;
+
+        new_data['uid'] = uid_;
+        new_data['name'] = _name;
 
         historico.push(new_data);
+
     }
 
     const historicoJson = JSON.stringify(historico);

@@ -123,3 +123,7 @@ app.get('/get', async (req, res) => {
   res.send(historicoJson);
 
 });
+
+const port = process.env.PORT || 3000;
+app.listen(port);
+console.log(`Servidor Hospedado na Porta ${port}`);

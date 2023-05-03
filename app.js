@@ -9,34 +9,6 @@ const DBC_Schema = new mongoose.Schema ({
                 nome:String
         }]
 });
-    
-const DB_Schema = new mongoose.Schema ({
-        uid: String,
-        nome: String,
-        cpf: String,
-        data_nascimento: String,
-        sexo: String,
-        email: String,
-        telefone: String,
-        contato_emergencia_nome: String,
-        conteto_emergencia_parentesco: String,
-        contato_emergencia_telefone: String,
-        rua: String,
-        numero: String,
-        bairro: String,
-        cep: String,
-        cidade: String,
-        estado: String,
-        residencia: [String],
-        apartamento: [String],
-        numero_quarto: [String],
-        data_entrada: [String],
-        data_saida: [String],
-        acesso: String,
-        historico_data: [String],
-        historico_sentido: [String],
-        historico_permissao: [String],
-});
 
 // definindo o modelo Residencia
 const Residencia = mongoose.model('residencias', {
@@ -101,20 +73,8 @@ const Funcionario = mongoose.model('funcionarios', {
         usuario: String
 });
 
-//definindo o modelo cartões
-const Cartoes = mongoose.model('cartoes', {
-  residencia: String,
-  list_of_cards: [
-    {
-        uid: String,
-        nome: String
-    }
-  ]
-});
 
 const DBCM = mongoose.model('cartoes', DBC_Schema);
-const DBM = mongoose.model('residentes', DB_Schema);
-
 
 const app = express();
 app.use(bodyParser.json());
@@ -144,7 +104,7 @@ app.post('/post', async (req, res) => {
 
         console.log(`UID ${uid} ; DATA ${data} ; SENTIDO ${sentido} ; PERMISSAO ${permissao}`);
         try{
-                DBM.findOneAndUpdate(
+                Residente.findOneAndUpdate(
                         {UID:uid},
                         {$push: {
                                 HistóricoData: FormatedData(data),
@@ -357,7 +317,7 @@ app.get('/funcionarios', async (_req, res) => {
 //Rotas dos cartões
 app.get('/cartoes', async (_req, res) => {
   try {
-    const cartoes = await Cartoes.find();
+    const cartoes = await DBCM.find();
     res.send(cartoes);
   } catch (error) {
     res.status(500).send(error);
@@ -367,7 +327,7 @@ app.get('/cartoes', async (_req, res) => {
 
 app.post('/cartoes', async (req, res) => {
   try {
-    const cartoes = new Cartoes(req.body);
+    const cartoes = new DBCM(req.body);
     await cartoes.save();
     res.send(cartoes);
   } catch (error) {
@@ -377,7 +337,7 @@ app.post('/cartoes', async (req, res) => {
 
 app.put('/cartoes/:id', async (req, res) => {
   try {
-    const cartoes = await Cartoes.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const cartoes = await DBCM.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.send(cartoes);
     
   } catch (error) {
@@ -387,7 +347,7 @@ app.put('/cartoes/:id', async (req, res) => {
 
 app.patch('/cartoes/:id', async (req, res) => {
   try {
-    const cartoes = await Cartoes.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const cartoes = await DBCM.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.send(cartoes);
   } catch (error) {
     res.status(500).send(error);
@@ -396,7 +356,7 @@ app.patch('/cartoes/:id', async (req, res) => {
 
 app.delete('/cartoes/:id', async (req, res) => {
   try {
-    const cartoes = await Cartoes.findByIdAndDelete(req.params.id);
+    const cartoes = await DBCM.findByIdAndDelete(req.params.id);
     res.send(cartoes);
   } catch (error) {
     res.status(500).send(error);

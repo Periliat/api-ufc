@@ -47,67 +47,65 @@ const db_string = "mongodb+srv://Kauan_Prog:Kauandbs159753.@garu.fwrnoix.mongodb
 mongoose.connect(db_string,{
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  useFindAndModify: false,
 });
 
-function FormatedData(unix){
-  unix = new Date(unix*1000).toLocaleString("pt-BR");
-  return unix;
-};
+
+// function FormatedData(unix){
+//   unix = new Date(unix*1000).toLocaleString("pt-BR");
+//   return unix;
+// };
 
 
-app.post('/post', async (req, res) => {
+async function processaPost(uid, data, sentido, permissao) {
+  const reversed = uid.match(/.{1,2}/g).map(pair => pair.split('').reverse().join('')).reverse().join('');
 
-  let uid, data, permissao, sentido;
-  for(let i=0; i<req.body.length;i++){
-      
-    uid = req.body[i].uid;
-    data = req.body[i].data;
-    sentido = req.body[i].sentido;
-    permissao = req.body[i].permissao;
+  console.log(`UID ${reversed} ; DATA ${data} ; SENTIDO ${sentido} ; PERMISSAO ${permissao}`);
 
-    console.log(`UID ${uid} ; DATA ${data} ; SENTIDO ${sentido} ; PERMISSAO ${permissao}`);
-    try{
-      Residente.findOneAndUpdate(
-        {UID:uid},
-        {$push: {
+  try {
+    const documento = await Residente.findOneAndUpdate(
+      { UID: reversed },
+      {
+        $push: {
           HistóricoData: FormatedData(data),
           HistóricoSentido: sentido,
           HistóricoPermissão: permissao
-        }}, async (err, documento) => {
-          if(err){
-            console.log(err);
-          }else{
-            if(i==req.body.length-1){
-                    console.log("Todos os documentos atualizados");
-                    return res.status(200).send("Operação feita com sucesso (CODE :200)");
-            }; //caso queria ver o documento, so atualizar por "documento"
-          }
         }
-      );
-    }catch(err){
-      console.log(err);
-      return res.status(-1).send("Erro interno do servidor");
-    };
+      }
+    ).exec();
+    
+    console.log("Documento atualizado com sucesso");
+    return documento;
+  } catch (err) {
+    console.log(err);
+    throw new Error("Erro interno do servidor");
+  }
+}
+
+app.post('/post', async (req, res) => {
+  try {
+    for (let i = 0; i < req.body.length; i++) {
+      const { uid, data, sentido, permissao } = req.body[i];
+      await processaPost(uid, data, sentido, permissao);
+    }
+
+    console.log("Todos os documentos atualizados");
+    return res.status(200).send("Operação feita com sucesso (CODE :200)");
+  } catch (err) {
+    console.log(err);
+    return res.status(-1).send("Erro interno do servidor");
   }
 });
 
-
 app.get('/get', async (req, res) => {
+  try {
+    const dispositivo = req.query.residencia;
+    const data = await Cartoes.findOne({ residencia: dispositivo }).exec();
+    const obj = data.objects;
 
-  const dispositivo = req.query.residencia
-  
-  //console.log(dispositivo)
-
-  const data = await Cartoes.findOne({ residencia:dispositivo}); 
-  const obj = data.objects
-
-  //console.log(obj);
-
-  let historico = [];
-  for(let i=0; i<obj.length; i++){
-      
+    let historico = [];
+    for (let i = 0; i < obj.length; i++) {
       let new_data = {};
-      
       const uid_ = obj[i].uid;
       const _name = obj[i].nome;
 
@@ -115,14 +113,17 @@ app.get('/get', async (req, res) => {
       new_data['name'] = _name;
 
       historico.push(new_data);
+    }
 
+    const historicoJson = JSON.stringify(historico);
+    console.log(historicoJson);
+    res.send(historicoJson);
+  } catch (err) {
+    console.log(err);
+    return res.status(-1).send("Erro interno do servidor");
   }
-
-  const historicoJson = JSON.stringify(historico);
-  console.log(historicoJson);
-  res.send(historicoJson);
-
 });
+
 
 const port = process.env.PORT || 3000;
 app.listen(port);

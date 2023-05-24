@@ -53,12 +53,13 @@ app.post('/post', async (req, res) => {
   for (let i=0; i<req.body.length; i++){
     
     const { uid, data, sentido, permissao } = req.body[i];
-    let reversed_uid = uid.match(/.{1,2}/g).reverse().join('');
+    
+    //let reversed_uid = uid.match(/.{1,2}/g).reverse().join('');
 
-    console.log(`\n${i+1}: ${reversed_uid}; ${data}; ${sentido}; ${permissao}`);
+    console.log(`\n${i+1}: ${uid}; ${data}; ${sentido}; ${permissao}`);
     try {
       await Residente.findOneAndUpdate(
-        { uid:reversed_uid },
+        { uid:uid },
         { $push: {
             historico_data: data,
             historico_sentido: sentido,

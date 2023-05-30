@@ -49,31 +49,34 @@ mongoose.connect(db_string,{
 });
 
 app.post('/post', async (req, res) => {
-  
-  for (let i=0; i<req.body.length; i++){
-    
-    const { uid, data, sentido, permissao } = req.body[i];
-    
-    //let reversed_uid = uid.match(/.{1,2}/g).reverse().join('');
+  try {
+    const requestData = req.body; // Assume que req.body é um array com todos os objetos JSON
 
-    console.log(`\n${i+1}: ${uid}; ${data}; ${sentido}; ${permissao}`);
-    try {
+    const updatePromises = requestData.map(async (obj) => {
+      const { uid, data, sentido, permissao } = obj;
+      // let reversed_uid = uid.match(/.{1,2}/g).reverse().join('');
+
+      console.log(`${reversed_uid}; ${data}; ${sentido}; ${permissao}`);
+
       await Residente.findOneAndUpdate(
-        { uid:uid },
-        { $push: {
+        { uid: uid },
+        {
+          $push: {
             historico_data: data,
             historico_sentido: sentido,
             historico_permissao: permissao
           }
         }
-      )
-          
-      console.log("Documento atualizado com sucesso");
-      if(i==req.body.length-1){res.status(200).send("OK");}
-    } catch (err) {
-      console.log(err);
-      res.status(500).send("Erro interno do servidor");
-    }
+      );
+    });
+
+    await Promise.all(updatePromises); // Aguarda todas as operações de atualização do banco de dados serem concluídas
+
+    console.log("Todos os documentos atualizados com sucesso");
+    res.status(200).send("OK");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Erro interno do servidor");
   }
 });
 

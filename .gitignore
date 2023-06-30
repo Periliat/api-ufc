@@ -1,3 +1,6 @@
+.env
+dockerfile
+
 # Logs
 logs
 yarn-debug.log*

@@ -42,7 +42,7 @@ const Cartoes = mongoose.model('cartoes', {
 const app = express();
 app.use(bodyParser.json());
 
-const db_string = "mongodb+srv://Kauan_Prog:Kauandbs159753.@garu.fwrnoix.mongodb.net/test?retryWrites=true&w=majority";
+const db_string = `${process.env.MONGO_URL}`;
 mongoose.connect(db_string,{
   useNewUrlParser: true,
   useUnifiedTopology: true,
